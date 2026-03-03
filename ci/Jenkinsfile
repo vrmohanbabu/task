@@ -1,0 +1,92 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE_NAME = "nodejs-app"
+    ECR_REPO = "<aws_account>.dkr.ecr.us-east-1.amazonaws.com/task/nodejs-app"
+    SCANNER_HOME= tool 'sonarqube-scanner'
+  }
+
+  stages {
+
+    stage('Checkout'){
+        steps{
+            git branch: "main", credentialsId: 'gitlab-cred', url: "https://gitlab.com/self-learn-things/nodejs_helloworld.git"
+            script {
+                    COMMIT_ID = sh(
+                        script: "git rev-parse --short HEAD",
+                        returnStdout: true
+                    ).trim()
+
+                    env.IMAGE_TAG = COMMIT_ID
+            }
+        }
+    }
+    
+    stage('Test'){
+        steps{
+            sh 'npm install'
+            sh 'npm test'
+        }
+    }
+
+    stage('Sonarqube Scanner'){
+        steps{
+            script {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''
+                    $SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=nodejs-app \
+                    -Dsonar.projectKey=nodejs-app \
+                    -Dsonar.branch.name=${BRANCH_NAME} \
+                    -Dsonar.sources=. \
+                    -Dsonar.exclusions=node_modules/** \
+                    -Dsonar.sourceEncoding=UTF-8
+                    '''
+                }
+            }
+        }
+    }    
+        
+    stage('Quality Gate Check'){
+        steps{
+            script {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+
+    stage('Build Image'){
+        steps{
+           sh 'docker build -t $IMAGE_NAME .'
+        }
+    }
+
+    stage('Tag'){
+        steps{
+            sh 'docker tag $IMAGE_NAME $ECR_REPO:${IMAGE_TAG}'
+            sh 'docker tag $IMAGE_NAME $ECR_REPO:Latest'
+        }
+    }
+
+    stage('Security_Scan'){
+        steps{
+             sh 'trivy image --exit-code 1 --severity CRITICAL $ECR_REPO:${IMAGE_TAG}'
+        }
+    }
+
+    stage('Push_to_ECR'){
+        steps{
+            sh '''
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <aws_account>.dkr.ecr.us-east-1.amazonaws.com
+            docker push $ECR_REPO:${IMAGE_TAG}
+            docker push $ECR_REPO:Latest
+            '''
+        }
+    }
+
+  }
+
+}
