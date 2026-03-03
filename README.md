@@ -27,13 +27,13 @@ monitoring/     → CloudWatch / Monitoring setup
 
 ## Task 1 - Application Setup
 
-### Install Dependencies
+# Install Dependencies
 
 ```
 npm ci
 ```
 
-### Run Application
+# Run Application
 
 ```
 node app.js
@@ -54,17 +54,17 @@ http://localhost:3000/health
 
 ## Docker
 
-### Build Image
+# Build Image
 ```
 docker build -t nodejs-app .
 ```
 
-### Run Container
+# Run Container
 ```
 docker run -p 3000:3000 nodejs-app
 ```
 
-### Push to ECR
+# Push to ECR
 ```
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <aws_account>.dkr.ecr.us-east-1.amazonaws.com
 docker push $ECR_REPO:Latest
@@ -86,7 +86,7 @@ Images are tagged as:
 ## TASK 3 - IAC
 Terraform provisions VPC, IAM, ECR, and EC2 infrastructure.
 
-### Provisioned resources:
+# Provisioned resources:
 
 * VPC (Public + Private Subnets + Route table + Internet Gateway) 
 * NAT Gateway
@@ -96,7 +96,7 @@ Terraform provisions VPC, IAM, ECR, and EC2 infrastructure.
 * DynamoDB (Terraform state lock)
 * S3 (Terraform state backend)
 
-### Terraform install command
+# Terraform install command
 ```
 sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
 wget -O- https://apt.releases.hashicorp.com/gpg | \
@@ -107,7 +107,7 @@ sudo apt update -y
 sudo apt-get install terraform -y
 ```
 
-### Deploy Infrastructure
+# Deploy Infrastructure
 
 ```
 terraform init
@@ -115,7 +115,7 @@ terraform plan
 terraform apply
 ```
 
-### Destroy Infrastructure
+# Destroy Infrastructure
 
 ```
 terraform destroy
@@ -132,7 +132,7 @@ Resources included:
 * Liveness & Readiness Probes
 
 
-### EKS create
+# EKS create
 
 # Environ Setup 
 ```
