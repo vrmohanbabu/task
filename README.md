@@ -27,13 +27,13 @@ monitoring/     → CloudWatch / Monitoring setup
 
 ## Task 1 - Application Setup
 
-# Install Dependencies
+#### Install Dependencies
 
 ```
 npm ci
 ```
 
-# Run Application
+#### Run Application
 
 ```
 node app.js
@@ -54,17 +54,17 @@ http://localhost:3000/health
 
 ## Docker
 
-# Build Image
+#### Build Image
 ```
 docker build -t nodejs-app .
 ```
 
-# Run Container
+#### Run Container
 ```
 docker run -p 3000:3000 nodejs-app
 ```
 
-# Push to ECR
+#### Push to ECR
 ```
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <aws_account>.dkr.ecr.us-east-1.amazonaws.com
 docker push $ECR_REPO:Latest
@@ -86,7 +86,7 @@ Images are tagged as:
 ## TASK 3 - IAC
 Terraform provisions VPC, IAM, ECR, and EC2 infrastructure.
 
-# Provisioned resources:
+#### Provisioned resources:
 
 * VPC (Public + Private Subnets + Route table + Internet Gateway) 
 * NAT Gateway
@@ -96,7 +96,7 @@ Terraform provisions VPC, IAM, ECR, and EC2 infrastructure.
 * DynamoDB (Terraform state lock)
 * S3 (Terraform state backend)
 
-# Terraform install command
+#### Terraform install command
 ```
 sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
 wget -O- https://apt.releases.hashicorp.com/gpg | \
@@ -107,7 +107,7 @@ sudo apt update -y
 sudo apt-get install terraform -y
 ```
 
-# Deploy Infrastructure
+#### Deploy Infrastructure
 
 ```
 terraform init
@@ -115,7 +115,7 @@ terraform plan
 terraform apply
 ```
 
-# Destroy Infrastructure
+#### Destroy Infrastructure
 
 ```
 terraform destroy
@@ -132,9 +132,9 @@ Resources included:
 * Liveness & Readiness Probes
 
 
-# EKS create
+## EKS create
 
-# Environ Setup 
+#### Environ Setup 
 ```
 sudo apt update -y
 sudo apt-get update -y
@@ -146,7 +146,7 @@ sudo apt-get install -y kubectl
 sudo apt-mark hold kubectl
 ```
 
-# Eks setup
+#### Eks setup
 ```
 ARCH=amd64
 PLATFORM=$(uname -s)_$ARCH
@@ -157,14 +157,14 @@ tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
 sudo mv /tmp/eksctl /usr/local/bin
 ```
 
-# Install AWS-CLI
+#### Install AWS-CLI
 ```
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/awass-cli --update
 ```
 
-# Create kubernetes cluster by using ekctl:
+#### Create kubernetes cluster by using ekctl:
 ```
 eksctl create cluster \
     --name task-eks-cluster \
@@ -181,12 +181,12 @@ eksctl create cluster \
     --zones us-east-1c \
 ```
      
-# Config kubectl to connect to Amazon EKS cluster:
+#### Config kubectl to connect to Amazon EKS cluster:
 ```
 aws eks update-kubeconfig --name task-eks-cluster --region us-east-1
 ```
 
-# Helm Setup and Install ALB Controller
+#### Helm Setup and Install ALB Controller
 ```
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
@@ -201,7 +201,7 @@ eksctl utils associate-iam-oidc-provider \
     --cluster task-eks-cluster \
     --approve
 
-## Download and Creare required policy and service account
+## Download and Create required policy and service account
 curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.14.1/docs/install/iam_policy.json
 aws iam create-policy --policy-name AWSLoadBalancerControllerIAMPolicy --policy-document file://iam_policy.json
 
@@ -224,7 +224,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set region=us-east-1
 ```
 
-# Apply:
+#### Apply:
 
 ```
 kubectl apply -f k8s/
